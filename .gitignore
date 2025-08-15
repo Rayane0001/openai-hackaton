@@ -73,3 +73,6 @@ pids
 # Temporary folders
 tmp/
 temp/
+
+# Others
+.qodo

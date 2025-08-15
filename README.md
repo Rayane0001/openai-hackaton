@@ -1,6 +1,6 @@
-# Multi-Scenario Future Self
+# Future Self Decision Advisor
 
-AI-powered platform to chat with multiple versions of your future self and compare life decision impacts.
+AI-powered decision advisor using GPT-OSS models for transparent life scenario planning.
 
 ## Setup
 
