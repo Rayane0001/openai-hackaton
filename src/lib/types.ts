@@ -149,3 +149,18 @@ export interface DashboardState {
 export type AIPersonality = 'optimistic' | 'realistic' | 'cautious' | 'adventurous';
 export type ReasoningLevel = 'low' | 'medium' | 'high';
 export type LifeMetric = keyof LifeStats;
+
+// GPT-OSS specific types
+export interface ScenarioResponse {
+  personality: AIPersonality;
+  reasoning: string;
+  content: string;
+}
+
+export interface PersonalityMultipliers {
+  financial: number;
+  happiness: number;
+  career: number;
+  relationships: number;
+  health: number;
+}

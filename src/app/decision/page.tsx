@@ -4,7 +4,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { Decision, Scenario } from '@/lib/types';
 import Layout from '@/components/layout/layout';
 import DecisionForm from '@/components/decision/decision-form';
@@ -13,15 +13,21 @@ import Button from '@/components/ui/button';
 
 export default function DecisionPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [step, setStep] = useState<'form' | 'analyzing' | 'results'>('form');
   const [decision, setDecision] = useState<Decision | null>(null);
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [quickDecisionData, setQuickDecisionData] = useState<any>(null);
 
-  // Pre-fill from URL params (from dashboard quick decision)
-  const initialDecision = searchParams.get('decision');
-  const initialCategory = searchParams.get('category');
+  // Load quick decision data from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem('quickDecision');
+    if (stored) {
+      const data = JSON.parse(stored);
+      setQuickDecisionData(data);
+      localStorage.removeItem('quickDecision'); // Clean up
+    }
+  }, []);
 
   const handleDecisionSubmit = async (decisionData: Partial<Decision>) => {
     setIsLoading(true);
@@ -54,11 +60,25 @@ export default function DecisionPage() {
       });
 
       if (response.ok) {
-        const { scenarios: generatedScenarios } = await response.json();
-        setScenarios(generatedScenarios);
-        setStep('results');
+        const responseData = await response.json();
+        if (responseData.success && responseData.data) {
+          const generatedScenarios = responseData.data.scenarios;
+          setScenarios(generatedScenarios);
+          
+          // Store scenarios for later use in /scenarios page
+          localStorage.setItem('userScenarios', JSON.stringify({
+            decision: newDecision,
+            scenarios: generatedScenarios,
+            timestamp: Date.now()
+          }));
+          
+          setStep('results');
+        } else {
+          throw new Error(responseData.error || 'Failed to generate scenarios');
+        }
       } else {
-        throw new Error('Failed to generate scenarios');
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(errorData.error || 'Failed to generate scenarios');
       }
     } catch (error) {
       console.error('Analysis failed:', error);
@@ -120,11 +140,12 @@ export default function DecisionPage() {
           {/* Content */}
           {step === 'form' && (
               <DecisionForm
+                  key={quickDecisionData ? 'with-data' : 'empty'} 
                   onSubmit={handleDecisionSubmit}
                   isLoading={isLoading}
                   initialData={{
-                    title: initialDecision || '',
-                    category: initialCategory as Decision['category'] || undefined
+                    title: quickDecisionData?.title || '',
+                    category: quickDecisionData?.category
                   }}
               />
           )}

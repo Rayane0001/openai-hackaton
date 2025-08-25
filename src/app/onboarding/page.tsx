@@ -108,7 +108,7 @@ export default function OnboardingPage() {
               Welcome to Future Self
             </h1>
             <p className="text-gray-600">
-              Let's understand you better to create accurate future scenarios
+              Let&apos;s understand you better to create accurate future scenarios
             </p>
           </div>
 

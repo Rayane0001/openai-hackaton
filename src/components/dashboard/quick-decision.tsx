@@ -40,17 +40,13 @@ export default function QuickDecision({ onAnalyze }: QuickDecisionProps) {
 
     setIsLoading(true);
 
-    if (onAnalyze) {
-      onAnalyze(decision, selectedCategory);
-    } else {
-      // Navigate to full decision page with prefilled data
-      const params = new URLSearchParams({
-        decision: decision,
-        category: selectedCategory
-      });
-      router.push(`/decision?${params}`);
-    }
+    // Store in localStorage to pass to decision page
+    localStorage.setItem('quickDecision', JSON.stringify({
+      title: decision,
+      category: selectedCategory
+    }));
 
+    router.push('/decision');
     setIsLoading(false);
   };
 
@@ -67,7 +63,7 @@ export default function QuickDecision({ onAnalyze }: QuickDecisionProps) {
               Quick Decision Analysis
             </h3>
             <p className="text-sm text-gray-600">
-              Get instant insights on any decision you're facing
+              Get instant insights on any decision you&apos;re facing
             </p>
           </div>
 

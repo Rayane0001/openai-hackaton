@@ -3,7 +3,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Decision } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import Card from '@/components/ui/card';
@@ -42,6 +42,21 @@ export default function DecisionForm({ onSubmit, isLoading = false, initialData 
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Update form data when initialData changes
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        title: initialData.title || '',
+        description: initialData.description || '',
+        category: initialData.category || '',
+        urgency: (initialData.urgency || 'medium') as 'low' | 'medium' | 'high',
+        timeline: initialData.timeline || '',
+        constraints: initialData.constraints?.join(', ') || '',
+        alternatives: initialData.alternatives?.join(', ') || ''
+      });
+    }
+  }, [initialData]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

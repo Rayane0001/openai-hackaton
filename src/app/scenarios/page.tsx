@@ -86,11 +86,14 @@ export default function ScenariosPage() {
 
   const loadScenarios = async () => {
     try {
-      // Mock loading - replace with real API call
-      setTimeout(() => {
-        setScenarios(mockScenarios);
-        setIsLoading(false);
-      }, 1000);
+      // Load user scenarios from localStorage
+      const stored = localStorage.getItem('userScenarios');
+      if (stored) {
+        const data = JSON.parse(stored);
+        setScenarios(data.scenarios);
+        setCurrentDecision(data.decision);
+      }
+      setIsLoading(false);
     } catch (error) {
       console.error('Failed to load scenarios:', error);
       setIsLoading(false);

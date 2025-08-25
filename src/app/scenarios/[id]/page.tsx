@@ -111,15 +111,16 @@ export default function ScenarioDetailPage() {
 
   const loadScenario = async () => {
     try {
-      // Mock loading - replace with real API call
-      setTimeout(() => {
-        if (scenarioId === 'scenario_1') {
-          setScenario(mockScenario);
-        } else {
-          setScenario(null);
+      // Load scenario from localStorage
+      const stored = localStorage.getItem('userScenarios');
+      if (stored) {
+        const data = JSON.parse(stored);
+        const foundScenario = data.scenarios.find((s: Scenario) => s.id === scenarioId);
+        if (foundScenario) {
+          setScenario(foundScenario);
         }
-        setIsLoading(false);
-      }, 500);
+      }
+      setIsLoading(false);
     } catch (error) {
       console.error('Failed to load scenario:', error);
       setIsLoading(false);

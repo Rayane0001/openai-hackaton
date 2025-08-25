@@ -5,6 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { LifeStats, Decision, Scenario } from '@/lib/types';
 import { sampleUserStats } from '@/data/life-metrics';
 import Layout from '@/components/layout/layout';
@@ -40,6 +41,7 @@ const sampleRecentDecisions: Decision[] = [
 ];
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [stats, setStats] = useState<LifeStats>(sampleUserStats);
   const [recentDecisions, setRecentDecisions] = useState<Decision[]>(sampleRecentDecisions);
   const [isLoading, setIsLoading] = useState(false);
@@ -53,7 +55,8 @@ export default function DashboardPage() {
 
   const handleQuickAnalysis = (decision: string, category: string) => {
     console.log('Quick analysis:', { decision, category });
-    // TODO: Implement quick analysis
+    // Navigate to decision page for full analysis
+    router.push('/decision');
   };
 
   return (
@@ -65,7 +68,7 @@ export default function DashboardPage() {
               Welcome back! 👋
             </h1>
             <p className="text-gray-600">
-              Here's your life overview and recent activity
+              Here&apos;s your life overview and recent activity
             </p>
           </div>
 
@@ -141,11 +144,19 @@ export default function DashboardPage() {
                           </div>
 
                           <div className="flex space-x-2">
-                            <Button size="sm" variant="outline">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => router.push('/scenarios')}
+                            >
                               View Analysis
                             </Button>
-                            <Button size="sm" variant="ghost">
-                              Update
+                            <Button 
+                              size="sm" 
+                              variant="ghost"
+                              onClick={() => router.push('/decision')}
+                            >
+                              Analyze Again
                             </Button>
                           </div>
                         </div>
@@ -171,10 +182,10 @@ export default function DashboardPage() {
             <div className="space-y-3">
               <h3 className="font-medium text-gray-900 flex items-center">
                 <span className="mr-2">💡</span>
-                Today's Tip
+                Today&apos;s Tip
               </h3>
               <p className="text-sm text-gray-600">
-                Your <strong>Health</strong> score is lower than other areas. Consider asking "Should I start a fitness routine?" to see how it impacts your future scenarios.
+                Your <strong>Health</strong> score is lower than other areas. Consider asking &quot;Should I start a fitness routine?&quot; to see how it impacts your future scenarios.
               </p>
             </div>
           </Card>

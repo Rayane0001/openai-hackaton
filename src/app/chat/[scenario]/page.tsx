@@ -125,7 +125,7 @@ export default function ChatPage() {
                   {error || 'Scenario Not Found'}
                 </h3>
                 <p className="text-gray-600">
-                  The scenario you're looking for doesn't exist or has been removed.
+                  The scenario you&apos;re looking for doesn&apos;t exist or has been removed.
                 </p>
                 <div className="flex space-x-3 justify-center">
                   <Button onClick={() => router.push('/scenarios')} variant="outline">
