@@ -13,26 +13,57 @@ interface QuickDecisionProps {
   onAnalyze?: (decision: string, category: string) => void;
 }
 
-const decisionCategories = [
-  { id: 'career', name: 'Career', icon: '💼', color: 'bg-blue-100 text-blue-700' },
-  { id: 'relationships', name: 'Relationships', icon: '❤️', color: 'bg-pink-100 text-pink-700' },
-  { id: 'financial', name: 'Financial', icon: '💰', color: 'bg-green-100 text-green-700' },
-  { id: 'lifestyle', name: 'Lifestyle', icon: '🏠', color: 'bg-purple-100 text-purple-700' },
-  { id: 'health', name: 'Health', icon: '🏃', color: 'bg-orange-100 text-orange-700' }
-];
-
-const quickPrompts = [
-  "Should I accept this job offer?",
-  "Is it time to move to a new city?",
-  "Should I end this relationship?",
-  "Should I start my own business?",
-  "Is it worth going back to school?"
-];
+const DECISION_CATEGORIES = {
+  career: {
+    icon: '🚀',
+    label: 'Career',
+    color: 'bg-blue-100 text-blue-700 border-blue-200',
+    suggestions: [
+      'Should I accept this job offer?',
+      'Should I ask for a promotion?',
+      'Should I change careers?',
+      'Should I start my own business?'
+    ]
+  },
+  relationships: {
+    icon: '💖',
+    label: 'Relationships',
+    color: 'bg-pink-100 text-pink-700 border-pink-200',
+    suggestions: [
+      'Should I move in with my partner?',
+      'Should I end this relationship?',
+      'Should I get married?',
+      'Should I have children?'
+    ]
+  },
+  lifestyle: {
+    icon: '🏡',
+    label: 'Lifestyle',
+    color: 'bg-purple-100 text-purple-700 border-purple-200',
+    suggestions: [
+      'Should I move to a new city?',
+      'Should I buy a house?',
+      'Should I travel for a year?',
+      'Should I go back to school?'
+    ]
+  },
+  financial: {
+    icon: '💰',
+    label: 'Financial',
+    color: 'bg-green-100 text-green-700 border-green-200',
+    suggestions: [
+      'Should I invest in stocks?',
+      'Should I take out a loan?',
+      'Should I buy or rent?',
+      'Should I start saving more aggressively?'
+    ]
+  }
+};
 
 export default function QuickDecision({ onAnalyze }: QuickDecisionProps) {
   const router = useRouter();
   const [decision, setDecision] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<keyof typeof DECISION_CATEGORIES | ''>('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleAnalyze = async () => {
@@ -50,94 +81,107 @@ export default function QuickDecision({ onAnalyze }: QuickDecisionProps) {
     setIsLoading(false);
   };
 
-  const handleQuickPrompt = (prompt: string) => {
-    setDecision(prompt);
+  const handleCategorySelect = (categoryKey: keyof typeof DECISION_CATEGORIES) => {
+    setSelectedCategory(categoryKey);
+    setDecision(''); // Clear current decision when switching categories
+  };
+
+  const handleSuggestionClick = (suggestion: string) => {
+    setDecision(suggestion);
+  };
+
+  const getCurrentSuggestions = () => {
+    if (selectedCategory && DECISION_CATEGORIES[selectedCategory]) {
+      return DECISION_CATEGORIES[selectedCategory].suggestions;
+    }
+    // Show mix from all categories if none selected
+    return Object.values(DECISION_CATEGORIES).flatMap(cat => cat.suggestions.slice(0, 2));
   };
 
   return (
-      <Card>
-        <div className="space-y-6">
-          {/* Header */}
-          <div className="text-center space-y-2">
-            <h3 className="text-lg font-semibold text-gray-900">
-              Quick Decision Analysis
-            </h3>
-            <p className="text-sm text-gray-600">
-              Get instant insights on any decision you&apos;re facing
-            </p>
-          </div>
+    <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl shadow-lg p-6 border border-purple-100">
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="text-center space-y-2">
+          <h3 className="text-xl font-bold text-gray-900">
+            🔮 What decision is on your mind?
+          </h3>
+          <p className="text-gray-600">
+            Get insights from 4 versions of your future self
+          </p>
+        </div>
 
-          {/* Quick prompts */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">
-              Or try these common decisions:
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {quickPrompts.map((prompt, index) => (
-                  <button
-                      key={index}
-                      onClick={() => handleQuickPrompt(prompt)}
-                      className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
-                  >
-                    {prompt}
-                  </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Decision input */}
-          <div className="space-y-3">
-            <label className="text-sm font-medium text-gray-700">
-              What decision are you facing?
-            </label>
-            <textarea
-                value={decision}
-                onChange={(e) => setDecision(e.target.value)}
-                placeholder="e.g., Should I accept this job offer in another city?"
-                className="w-full h-20 p-3 border border-gray-300 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 resize-none"
-            />
-          </div>
-
-          {/* Category selection */}
-          <div className="space-y-3">
-            <label className="text-sm font-medium text-gray-700">
-              Category (optional)
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {decisionCategories.map((category) => (
-                  <button
-                      key={category.id}
-                      onClick={() => setSelectedCategory(category.id)}
-                      className={cn(
-                          "flex items-center space-x-2 px-3 py-2 rounded-lg border-2 transition-all",
-                          selectedCategory === category.id
-                              ? `${category.color} border-current`
-                              : "border-gray-200 hover:border-gray-300 text-gray-600"
-                      )}
-                  >
-                    <span>{category.icon}</span>
-                    <span className="text-sm font-medium">{category.name}</span>
-                  </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Action button */}
-          <Button
-              onClick={handleAnalyze}
-              disabled={!decision.trim() || isLoading}
-              loading={isLoading}
-              className="w-full"
-              size="lg"
-          >
-            {isLoading ? 'Analyzing...' : 'Analyze Decision 🔮'}
-          </Button>
-
-          {/* Info */}
-          <div className="text-center text-xs text-gray-500">
-            ⚡ Get instant impact analysis and future scenarios
+        {/* Category Selection */}
+        <div>
+          <p className="text-sm font-medium text-gray-700 mb-3">Choose a category:</p>
+          <div className="grid grid-cols-2 gap-2">
+            {Object.entries(DECISION_CATEGORIES).map(([key, category]) => (
+              <button
+                key={key}
+                onClick={() => handleCategorySelect(key as keyof typeof DECISION_CATEGORIES)}
+                className={cn(
+                  "p-3 rounded-lg border-2 transition-all duration-200 text-left",
+                  selectedCategory === key
+                    ? `${category.color}`
+                    : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">{category.icon}</span>
+                  <span className="font-medium text-sm">{category.label}</span>
+                </div>
+              </button>
+            ))}
           </div>
         </div>
-      </Card>
+
+        {/* Decision Input */}
+        <div className="space-y-3">
+          <label className="text-sm font-medium text-gray-700">
+            Describe your decision:
+          </label>
+          <textarea
+            value={decision}
+            onChange={(e) => setDecision(e.target.value)}
+            placeholder="What decision are you facing? Be as specific as you'd like..."
+            className="w-full h-24 p-4 border-2 border-gray-200 rounded-xl resize-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors text-gray-900 placeholder-gray-500"
+          />
+        </div>
+
+        {/* Dynamic Suggestions */}
+        <div>
+          <p className="text-sm font-medium text-gray-700 mb-2">
+            {selectedCategory ? 'Or choose a common scenario:' : 'Popular decisions:'}
+          </p>
+          <div className="space-y-2 max-h-40 overflow-y-auto">
+            {getCurrentSuggestions().map((suggestion, index) => (
+              <button
+                key={index}
+                onClick={() => handleSuggestionClick(suggestion)}
+                className="w-full text-left p-3 text-sm bg-white border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-all duration-200"
+              >
+                {suggestion}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Submit Button */}
+        <Button
+          onClick={handleAnalyze}
+          disabled={!decision.trim() || isLoading}
+          loading={isLoading}
+          className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+          size="lg"
+        >
+          {isLoading ? 'Creating scenarios...' : '✨ Talk to Your Future Selves'}
+        </Button>
+
+        {/* Info */}
+        <div className="text-center text-xs text-gray-500">
+          💡 Get personalized insights from optimistic, realistic, cautious & adventurous versions of your future self
+        </div>
+      </div>
+    </div>
   );
 }

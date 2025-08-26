@@ -13,7 +13,7 @@ import Card from '@/components/ui/card';
 interface AssessmentFormProps {
   questions: AssessmentQuestion[];
   answers: AssessmentAnswer[];
-  onAnswerChange: (answer: AssessmentAnswer) => void;
+  onAnswerChange: (questionId: string, value: string | number) => void;
   onSubmit: () => void;
   currentQuestionIndex: number;
   onNext: () => void;
@@ -35,24 +35,15 @@ export default function AssessmentForm({
   const isFirstQuestion = currentQuestionIndex === 0;
 
   const handleScaleChange = (value: number) => {
-    onAnswerChange({
-      questionId: currentQuestion.id,
-      value: value  // Garder comme number
-    });
+    onAnswerChange(currentQuestion.id, value);
   };
 
   const handleMultipleChoice = (value: string) => {
-    onAnswerChange({
-      questionId: currentQuestion.id,
-      value: value
-    });
+    onAnswerChange(currentQuestion.id, value);
   };
 
   const handleTextChange = (value: string) => {
-    onAnswerChange({
-      questionId: currentQuestion.id,
-      value: value
-    });
+    onAnswerChange(currentQuestion.id, value);
   };
 
   const canProceed = () => {
@@ -80,60 +71,69 @@ export default function AssessmentForm({
 
   if (!currentQuestion) {
     return (
-        <Card className="text-center">
-          <div className="space-y-4">
+        <div className="text-center space-y-8 p-8">
+          <div className="w-32 h-32 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center mx-auto shadow-2xl">
             <div className="text-6xl">🎉</div>
-            <h2 className="text-2xl font-bold">Assessment Complete!</h2>
-            <p className="text-gray-600">Ready to generate your future scenarios</p>
-            <Button onClick={onSubmit} size="lg">
-              Generate My Future Scenarios
-            </Button>
           </div>
-        </Card>
+          <div className="space-y-4">
+            <h2 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+              Assessment Complete!
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Perfect! All questions answered. Ready to generate your personalized future scenarios.
+            </p>
+          </div>
+          <button 
+            onClick={onSubmit}
+            className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-12 py-6 rounded-3xl text-2xl font-semibold hover:from-green-700 hover:to-emerald-700 transition-all duration-300 shadow-2xl hover:shadow-green-500/25 transform hover:scale-105"
+          >
+            ✨ Generate My Future Scenarios
+          </button>
+        </div>
     );
   }
 
   return (
-      <Card>
-        <div className="space-y-6">
-          {/* Progress indicator */}
-          <div className="flex items-center justify-between text-sm text-gray-500">
-            <span>Question {currentQuestionIndex + 1} of {questions.length}</span>
-            <span className="flex items-center space-x-1">
+      <div className="space-y-8">
+        {/* Question Header */}
+        <div className="text-center space-y-4">
+          <div className="flex items-center justify-center gap-4">
+            <span className="text-gray-600">Question {currentQuestionIndex + 1} of {questions.length}</span>
             <span className={cn(
-                "px-2 py-1 rounded-full text-xs font-medium",
-                currentQuestion.tier === 1 && "bg-yellow-100 text-yellow-700",
-                currentQuestion.tier === 2 && "bg-blue-100 text-blue-700",
-                currentQuestion.tier === 3 && "bg-purple-100 text-purple-700"
+                "px-4 py-2 rounded-full text-sm font-medium",
+                currentQuestion.tier === 1 && "bg-gradient-to-r from-yellow-400 to-orange-500 text-white",
+                currentQuestion.tier === 2 && "bg-gradient-to-r from-blue-400 to-indigo-500 text-white",
+                currentQuestion.tier === 3 && "bg-gradient-to-r from-purple-400 to-pink-500 text-white"
             )}>
               Tier {currentQuestion.tier}
             </span>
-          </span>
           </div>
+          
+          <h3 className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight max-w-3xl mx-auto">
+            {currentQuestion.question}
+          </h3>
+        </div>
 
-          {/* Question */}
+        <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/20">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              {currentQuestion.question}
-            </h3>
 
             {/* Scale input */}
             {currentQuestion.type === 'scale' && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between text-sm text-gray-600">
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between text-sm text-gray-600 font-medium">
                     <span>Strongly Disagree</span>
                     <span>Strongly Agree</span>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center justify-center space-x-4">
                     {[1, 2, 3, 4, 5].map(value => (
                         <button
                             key={value}
                             onClick={() => handleScaleChange(value)}
                             className={cn(
-                                "w-12 h-12 rounded-full border-2 font-medium transition-colors",
+                                "w-16 h-16 rounded-full border-2 font-bold text-lg transition-all duration-200 hover:scale-105",
                                 (typeof currentAnswer?.value === 'number' && currentAnswer.value === value)
-                                    ? "border-purple-500 bg-purple-500 text-white"
-                                    : "border-gray-300 hover:border-purple-300"
+                                    ? "border-indigo-500 bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg"
+                                    : "border-gray-300 hover:border-indigo-300 bg-white hover:bg-indigo-50"
                             )}
                         >
                           {value}
@@ -145,19 +145,19 @@ export default function AssessmentForm({
 
             {/* Multiple choice */}
             {currentQuestion.type === 'multiple' && (
-                <div className="grid gap-3">
+                <div className="grid gap-4">
                   {currentQuestion.options?.map(option => (
                       <button
                           key={option}
                           onClick={() => handleMultipleChoice(option)}
                           className={cn(
-                              "p-4 text-left border-2 rounded-lg transition-colors",
+                              "p-6 text-left border-2 rounded-2xl transition-all duration-200 hover:scale-[1.02]",
                               (typeof currentAnswer?.value === 'string' && currentAnswer.value === option)
-                                  ? "border-purple-500 bg-purple-50"
-                                  : "border-gray-200 hover:border-gray-300"
+                                  ? "border-indigo-500 bg-gradient-to-r from-indigo-50 to-purple-50 shadow-lg"
+                                  : "border-gray-200 hover:border-indigo-200 bg-white hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50"
                           )}
                       >
-                        {option}
+                        <span className="font-medium text-gray-900">{option}</span>
                       </button>
                   ))}
                 </div>
@@ -165,23 +165,26 @@ export default function AssessmentForm({
 
             {/* Text input */}
             {currentQuestion.type === 'text' && (
-                <div className="space-y-2">
+                <div className="space-y-4">
                   {currentQuestion.id === 'age' ? (
-                      <input
-                          type="number"
-                          min="13"
-                          max="120"
-                          value={typeof currentAnswer?.value === 'string' ? currentAnswer.value : ''}
-                          onChange={(e) => handleTextChange(e.target.value)}
-                          className="w-full p-3 border border-gray-300 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
-                          placeholder="Enter your age"
-                      />
+                      <div className="text-center">
+                        <input
+                            type="number"
+                            min="13"
+                            max="120"
+                            value={typeof currentAnswer?.value === 'string' ? currentAnswer.value : ''}
+                            onChange={(e) => handleTextChange(e.target.value)}
+                            className="w-32 text-center text-2xl font-bold p-4 border-2 border-gray-200 rounded-2xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all"
+                            placeholder="25"
+                        />
+                        <p className="text-sm text-gray-500 mt-2">years old</p>
+                      </div>
                   ) : (
                       <textarea
                           value={typeof currentAnswer?.value === 'string' ? currentAnswer.value : ''}
                           onChange={(e) => handleTextChange(e.target.value)}
-                          className="w-full h-24 p-3 border border-gray-300 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
-                          placeholder="Share your thoughts..."
+                          className="w-full h-32 p-6 border-2 border-gray-200 rounded-2xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all resize-none"
+                          placeholder="Share your thoughts in detail..."
                           maxLength={500}
                       />
                   )}
@@ -190,23 +193,24 @@ export default function AssessmentForm({
           </div>
 
           {/* Navigation */}
-          <div className="flex items-center justify-between pt-4">
-            <Button
-                variant="ghost"
+          <div className="flex items-center justify-between pt-8">
+            <button
                 onClick={onPrevious}
                 disabled={isFirstQuestion}
+                className="flex items-center gap-2 px-6 py-3 text-gray-600 hover:text-gray-800 font-medium rounded-2xl border-2 border-gray-200 hover:border-gray-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               ← Previous
-            </Button>
+            </button>
 
-            <Button
+            <button
                 onClick={isLastQuestion ? onSubmit : onNext}
                 disabled={!canProceed()}
+                className="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 disabled:hover:scale-100 shadow-lg"
             >
-              {isLastQuestion ? 'Complete Assessment' : 'Next →'}
-            </Button>
+              {isLastQuestion ? '✨ Complete Assessment' : 'Continue →'}
+            </button>
           </div>
         </div>
-      </Card>
+      </div>
   );
 }
